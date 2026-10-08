@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bytele</title>
+<style>
+:root{--bg:#f4f3fb;--card:#fff;--text:#1b1f3b;--muted:#5d6286;--line:#d3d2ec;--tile:#e3e2f5;--tile-text:#4a4f86;--hit:#2a8a4f;--hit-text:#fff;--accent:#3a3fa8;--accent-text:#fff;--warn:#b3261e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14172e;--card:#1d2142;--text:#eceefb;--muted:#9aa0cf;--line:#2f3566;--tile:#262b57;--tile-text:#aab0e6;--accent:#8e94ff;--accent-text:#10132b;--warn:#ff8a80}}
+:root[data-theme="dark"]{--bg:#14172e;--card:#1d2142;--text:#eceefb;--muted:#9aa0cf;--line:#2f3566;--tile:#262b57;--tile-text:#aab0e6;--accent:#8e94ff;--accent-text:#10132b;--warn:#ff8a80}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+main{max-width:520px;margin:0 auto;padding:32px 20px 48px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+header{text-align:center;transition:margin .5s}
+.tiles{display:flex;justify-content:center;gap:clamp(4px,1.6vw,8px);margin:12vh 0 22px;transition:margin .5s}
+.tile{width:clamp(46px,13vw,66px);aspect-ratio:1;display:grid;place-items:center;border-radius:8px;background:var(--tile);color:var(--tile-text);font:600 clamp(11px,3vw,14px)/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em}
+.tile.done{background:var(--hit);color:var(--hit-text);font:700 clamp(24px,7vw,34px)/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:0}
+.tag{min-height:1.6em;margin:0;color:var(--muted);font-size:1.05rem}
+.compact .tiles{margin:2vh 0 14px}
+.card{margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 20px}
+.card[hidden]{display:none}
+.card.in{animation:rise .35s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h2{margin:0 0 4px;font-size:1.3rem;line-height:1.3}
+.sub{margin:0 0 18px;color:var(--muted)}
+label,legend{display:block;margin:16px 0 6px;font-weight:600;padding:0}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+input[type=text],input[type=date]{width:100%;padding:11px 12px;font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:8px}
+input:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{margin:0;position:relative;font-weight:500}
+.chip input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.chip span{display:block;padding:9px 14px;border:1px solid var(--line);border-radius:999px;background:var(--bg);pointer-events:none}
+.chip input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.chip input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.chip input:disabled{cursor:not-allowed}
+.chip input:disabled+span{opacity:.5;border-style:dashed}
+.chip small{margin-left:4px;color:inherit;opacity:.8}
+.err{min-height:1.4em;margin:14px 0 0;color:var(--warn);font-size:.95rem}
+.row{display:flex;gap:10px;margin-top:8px}
+.btn{flex:1;padding:12px 16px;font:inherit;font-weight:600;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-text);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--text);border-color:var(--line);flex:0 0 auto}
+.mute{color:var(--muted);margin:14px 0 0}
+@media (prefers-reduced-motion:reduce){.card.in{animation:none}header,.tiles{transition:none}}
+:root{--near:#e2b32b;--near-text:#1b1f3b;--none:#6b7194}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--near:#e2b32b;--near-text:#1b1f3b;--none:#3a4072}}
+:root[data-theme="dark"]{--near:#e2b32b;--near-text:#1b1f3b;--none:#3a4072}
+.game{margin-top:8px}
+.info{text-align:center;color:var(--muted);margin:0 0 14px}
+.grid{display:grid;gap:5px;margin:0 auto;width:min(100%,calc(var(--n)*62px))}
+.grow{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:5px}
+.cell{aspect-ratio:1;display:grid;place-items:center;border:2px solid var(--line);border-radius:6px;font:700 clamp(16px,6vw,28px) ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--text)}
+.cell.filled{border-color:var(--muted)}
+.cell.ok,.cell.near,.cell.none{border-color:transparent;color:#fff}
+.cell.ok,.key.ok{background:var(--hit);color:var(--hit-text)}
+.cell.near,.key.near{background:var(--near);color:var(--near-text)}
+.cell.none,.key.none{background:var(--none);color:#fff}
+.msg{min-height:1.5em;text-align:center;font-weight:600;margin:12px 0}
+.kb{display:grid;gap:6px}
+.krow{display:flex;gap:5px;justify-content:center}
+.key{flex:1;min-width:0;max-width:44px;padding:13px 0;border:0;border-radius:6px;background:var(--tile);color:var(--text);font-family:inherit;font-weight:600;font-size:.9rem;cursor:pointer;text-transform:uppercase}
+.key[data-k=enter],.key[data-k=back]{flex:1.6;max-width:66px;font-size:.72rem}
+.key:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+<header id="intro">
+  <h1 class="sr">Bytele</h1>
+  <div class="tiles" id="tiles" aria-hidden="true"></div>
+  <p class="tag" id="tag"></p>
+</header>
+
+<form class="card" id="s1" hidden novalidate>
+  <h2>Let's get you set up</h2>
+  <p class="sub">Tell us a little about you before the first round.</p>
+  <label for="name">Name</label>
+  <input type="text" id="name" maxlength="24" autocomplete="given-name">
+  <label for="dob">Date of birth</label>
+  <input type="date" id="dob" min="1900-01-01">
+  <fieldset>
+    <legend>I am a</legend>
+    <div class="chips" id="roles"></div>
+  </fieldset>
+  <p class="err" id="e1" role="alert"></p>
+  <div class="row"><button class="btn" type="submit">Next</button></div>
+</form>
+
+<form class="card" id="s2" hidden novalidate>
+  <h2 id="hi"></h2>
+  <p class="sub">Choose your word length and topic.</p>
+  <fieldset>
+    <legend>Word length</legend>
+    <div class="chips" id="lens"></div>
+  </fieldset>
+  <fieldset>
+    <legend>Category</legend>
+    <div class="chips" id="cats"></div>
+  </fieldset>
+  <p class="err" id="e2" role="alert"></p>
+  <div class="row">
+    <button class="btn ghost" type="button" id="back">Back</button>
+    <button class="btn" type="submit">Start game</button>
+  </div>
+</form>
+
+<section class="game" id="s3" hidden>
+  <p class="info" id="info"></p>
+  <div class="grid" id="grid" aria-label="Guess grid"></div>
+  <p class="msg" id="msg" role="status"></p>
+  <div class="kb" id="kb"></div>
+  <div class="card" id="end" hidden>
+    <h2 id="endTitle"></h2>
+    <p class="sub" id="endDef"></p>
+    <div class="row">
+      <button class="btn ghost" type="button" id="change">Change setup</button>
+      <button class="btn" type="button" id="again">Play again</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+// Edit these as your word list grows
+const WORDS = [{"word": "code", "category": "Programming", "definition": "Instructions written for a computer to perform a task."}, {"word": "loop", "category": "Programming", "definition": "A structure that repeats a set of instructions."}, {"word": "list", "category": "Data Structures", "definition": "An ordered collection of values."}, {"word": "node", "category": "Data Structures", "definition": "A basic element that stores data in a data structure."}, {"word": "heap", "category": "Data Structures", "definition": "A tree-based structure used for organizing data by priority."}, {"word": "stack", "category": "Data Structures", "definition": "A structure that follows last-in, first-out order."}, {"word": "queue", "category": "Data Structures", "definition": "A structure that normally follows first-in, first-out order."}, {"word": "array", "category": "Data Structures", "definition": "A collection of elements stored in indexed positions."}, {"word": "tuple", "category": "Programming", "definition": "An ordered collection of values that normally cannot be changed."}, {"word": "input", "category": "Programming", "definition": "Data supplied to a program."}, {"word": "print", "category": "Programming", "definition": "An instruction used to display output."}, {"word": "float", "category": "Programming", "definition": "A number type that can contain decimal values."}, {"word": "class", "category": "Programming", "definition": "A blueprint used to create objects."}, {"word": "mouse", "category": "Hardware", "definition": "A pointing device used to control a computer cursor."}, {"word": "screen", "category": "Hardware", "definition": "A display that shows text, images, or video."}, {"word": "router", "category": "Networking", "definition": "A device that forwards data between networks."}, {"word": "switch", "category": "Networking", "definition": "A device that connects devices within a network."}, {"word": "packet", "category": "Networking", "definition": "A small unit of data sent across a network."}, {"word": "server", "category": "Networking", "definition": "A computer that provides services to other devices."}, {"word": "client", "category": "Networking", "definition": "A device or program that requests services from a server."}, {"word": "domain", "category": "Networking", "definition": "A readable name used to identify an internet resource."}, {"word": "socket", "category": "Networking", "definition": "An endpoint used for network communication."}, {"word": "string", "category": "Programming", "definition": "A sequence of characters used to represent text."}, {"word": "return", "category": "Programming", "definition": "A statement that sends a value back from a function."}, {"word": "syntax", "category": "Programming", "definition": "The rules for writing valid programming code."}, {"word": "debug", "category": "Programming", "definition": "To find and fix errors in a program."}, {"word": "binary", "category": "Data Structures", "definition": "A system or structure involving two possible values or branches."}, {"word": "search", "category": "Data Structures", "definition": "The process of finding an element in a data structure."}, {"word": "filter", "category": "Databases", "definition": "A condition used to select specific data."}, {"word": "record", "category": "Databases", "definition": "A collection of related fields describing one item."}, {"word": "schema", "category": "Databases", "definition": "The structure that defines how a database is organized."}, {"word": "backup", "category": "Databases", "definition": "A copy of data kept for recovery."}, {"word": "insert", "category": "Databases", "definition": "An operation used to add new data."}, {"word": "update", "category": "Databases", "definition": "An operation used to change existing data."}, {"word": "delete", "category": "Databases", "definition": "An operation used to remove data."}, {"word": "select", "category": "Databases", "definition": "An SQL command used to retrieve data."}, {"word": "browser", "category": "Web", "definition": "Software used to access and view websites."}, {"word": "website", "category": "Web", "definition": "A collection of related web pages."}, {"word": "hosting", "category": "Web", "definition": "A service that stores website files online."}, {"word": "cookie", "category": "Web", "definition": "Small data stored by a website in a browser."}, {"word": "script", "category": "Web", "definition": "Code used to add behavior to a web page."}, {"word": "button", "category": "Web", "definition": "A clickable element that performs an action."}, {"word": "layout", "category": "Web", "definition": "The arrangement of elements on a web page."}, {"word": "header", "category": "Web", "definition": "The top section of a web page."}, {"word": "footer", "category": "Web", "definition": "The bottom section of a web page."}, {"word": "malware", "category": "Security", "definition": "Software designed to harm, spy on, or misuse systems."}, {"word": "spyware", "category": "Security", "definition": "Software that secretly monitors user activity."}, {"word": "password", "category": "Security", "definition": "A secret string used to authenticate a user."}, {"word": "firewall", "category": "Security", "definition": "A system that controls allowed network traffic."}, {"word": "phishing", "category": "Security", "definition": "An attack that tricks users into revealing sensitive information."}, {"word": "security", "category": "Security", "definition": "Protection of systems, data, and networks from threats."}, {"word": "identity", "category": "Security", "definition": "Information used to identify a user or system."}, {"word": "computer", "category": "Hardware", "definition": "An electronic device that processes and stores data."}, {"word": "hardware", "category": "Hardware", "definition": "The physical parts of a computer system."}, {"word": "keyboard", "category": "Hardware", "definition": "An input device used to enter text and commands."}, {"word": "monitor", "category": "Hardware", "definition": "A screen used to display computer output."}, {"word": "printer", "category": "Hardware", "definition": "A device that produces physical copies of digital content."}, {"word": "scanner", "category": "Hardware", "definition": "A device that converts physical documents into digital form."}, {"word": "battery", "category": "Hardware", "definition": "A component that stores electrical energy."}, {"word": "adapter", "category": "Hardware", "definition": "A device that helps different components or connectors work together."}, {"word": "display", "category": "Hardware", "definition": "A device or surface that presents visual information."}, {"word": "laptop", "category": "Hardware", "definition": "A portable computer with a screen and keyboard."}, {"word": "tablet", "category": "Hardware", "definition": "A portable touchscreen computing device."}, {"word": "camera", "category": "Hardware", "definition": "A device that captures photos or video."}, {"word": "speaker", "category": "Hardware", "definition": "A device that produces sound."}, {"word": "network", "category": "Networking", "definition": "A group of connected devices that communicate with each other."}, {"word": "protocol", "category": "Networking", "definition": "A set of rules used for communication between devices."}, {"word": "gateway", "category": "Networking", "definition": "A device or system that connects different networks."}, {"word": "wireless", "category": "Networking", "definition": "Communication that uses radio signals instead of cables."}, {"word": "latency", "category": "Networking", "definition": "The delay between sending data and receiving a response."}, {"word": "routing", "category": "Networking", "definition": "The process of choosing paths for data across networks."}, {"word": "upload", "category": "Networking", "definition": "The process of sending data to another system."}, {"word": "download", "category": "Networking", "definition": "The process of receiving data from another system."}, {"word": "database", "category": "Databases", "definition": "An organized collection of data."}, {"word": "primary", "category": "Databases", "definition": "Describes the main key used to identify records."}, {"word": "foreign", "category": "Databases", "definition": "Describes a key that refers to another table."}, {"word": "column", "category": "Databases", "definition": "A vertical set of values in a database table."}, {"word": "table", "category": "Databases", "definition": "A database structure containing rows and columns."}, {"word": "query", "category": "Databases", "definition": "A request used to retrieve or manipulate data."}, {"word": "field", "category": "Databases", "definition": "A column or individual type of data in a record."}, {"word": "index", "category": "Databases", "definition": "A structure that helps find database records quickly."}, {"word": "create", "category": "Databases", "definition": "An SQL command used to create database objects."}, {"word": "integer", "category": "Programming", "definition": "A whole-number data type."}, {"word": "boolean", "category": "Programming", "definition": "A data type representing true or false."}, {"word": "variable", "category": "Programming", "definition": "A named storage location for a value."}, {"word": "function", "category": "Programming", "definition": "A reusable block of code that performs a task."}, {"word": "operator", "category": "Programming", "definition": "A symbol or keyword used to perform an operation."}, {"word": "compile", "category": "Programming", "definition": "To translate source code into a form a computer can run."}, {"word": "execute", "category": "Programming", "definition": "To run a program or instruction."}, {"word": "package", "category": "Programming", "definition": "A collection of related program modules."}, {"word": "library", "category": "Programming", "definition": "A collection of reusable programming code."}, {"word": "pointer", "category": "Programming", "definition": "A variable that stores a memory address."}, {"word": "comment", "category": "Programming", "definition": "Text in code used to explain something to programmers."}, {"word": "keyword", "category": "Programming", "definition": "A reserved word with a special meaning in a programming language."}, {"word": "algorithm", "category": "Programming", "definition": "A step-by-step method for solving a problem."}, {"word": "recursion", "category": "Programming", "definition": "A technique where a function calls itself."}, {"word": "frontend", "category": "Web", "definition": "The part of a web application users see and interact with."}, {"word": "backend", "category": "Web", "definition": "The server-side part of a web application."}, {"word": "request", "category": "Web", "definition": "A message sent to a server asking for a resource."}, {"word": "response", "category": "Web", "definition": "Data returned by a server after a request."}];
+const LENGTHS = [...new Set(WORDS.map(w => w.word.length))].sort((a, b) => a - b);
+const AVAILABLE = LENGTHS;
+const CATEGORIES = ["Programming","Data Structures","Networking","Hardware","Web","Databases","Security"];
+const ROLES = ["Student","Professional","Other"];
+
+const $ = id => document.getElementById(id);
+const S = {};
+const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let skip = REDUCE;
+const sleep = ms => new Promise(r => setTimeout(r, skip ? 0 : ms));
+["pointerdown","keydown"].forEach(e => addEventListener(e, () => { skip = true; }, {once:true}));
+
+const bits = c => c.charCodeAt(0).toString(2).padStart(8, "0");
+const showBits = (t, b) => { t.innerHTML = b.slice(0,4) + "<br>" + b.slice(4); };
+const rnd = () => Array.from({length:8}, () => Math.random() < .5 ? 0 : 1).join("");
+
+async function flip(t, letter){
+  const d = skip ? 0 : 220;
+  await t.animate([{transform:"rotateX(0)"},{transform:"rotateX(90deg)"}], {duration:d, fill:"forwards"}).finished;
+  t.classList.add("done"); t.textContent = letter;
+  await t.animate([{transform:"rotateX(90deg)"},{transform:"rotateX(0)"}], {duration:d, fill:"forwards"}).finished;
+}
+
+async function intro(){
+  const word = "BYTELE", box = $("tiles");
+  const tiles = [...word].map(() => { const t = document.createElement("div"); t.className = "tile"; box.appendChild(t); return t; });
+  for (let i = 0; i < 12; i++){ tiles.forEach(t => showBits(t, rnd())); await sleep(60); }
+  tiles.forEach((t, i) => showBits(t, bits(word[i])));
+  await sleep(600);
+  const flips = [];
+  for (let i = 0; i < tiles.length; i++){ flips.push(flip(tiles[i], word[i])); await sleep(150); }
+  await Promise.all(flips);
+  await sleep(350);
+  const text = "Compile your thoughts, one letter at a time.";
+  for (const ch of text){ $("tag").textContent += ch; await sleep(32); }
+  await sleep(700);
+  $("intro").classList.add("compact");
+  skip = REDUCE;
+  show("s1");
+  $("name").focus({preventScroll:true});
+}
+
+function show(id){
+  ["s1","s2","s3"].forEach(x => { $(x).hidden = x !== id; });
+  const c = $(id); c.classList.remove("in"); void c.offsetWidth; c.classList.add("in");
+}
+
+function chip(group, name, value, label, disabled, note){
+  const l = document.createElement("label"); l.className = "chip";
+  const i = document.createElement("input"); i.type = "radio"; i.name = name; i.value = value; i.disabled = !!disabled;
+  const s = document.createElement("span"); s.textContent = label;
+  if (note){ const n = document.createElement("small"); n.textContent = note; s.appendChild(n); }
+  l.append(i, s); group.appendChild(l);
+}
+ROLES.forEach(r => chip($("roles"), "role", r, r));
+LENGTHS.forEach(n => chip($("lens"), "len", n, n + " letters", !AVAILABLE.includes(n), AVAILABLE.includes(n) ? "" : "soon"));
+CATEGORIES.forEach(c => chip($("cats"), "cat", c, c));
+const pick = n => (document.querySelector('input[name="' + n + '"]:checked') || {}).value;
+
+$("dob").max = new Date().toISOString().slice(0, 10);
+
+$("s1").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = $("name").value.trim(), dob = $("dob").value, role = pick("role");
+  let err = "";
+  if (!name) err = "Enter your name to continue.";
+  else if (!dob) err = "Enter your date of birth.";
+  else if (dob > $("dob").max || dob < "1900-01-01") err = "Check your date of birth. It should be a past date.";
+  else if (!role) err = "Choose whether you are a student, professional, or other.";
+  $("e1").textContent = err;
+  if (err) return;
+  Object.assign(S, {name, dob, role});
+  $("hi").textContent = "Hi " + name + ", set up your round";
+  show("s2");
+});
+
+$("back").addEventListener("click", () => show("s1"));
+
+$("s2").addEventListener("submit", e => {
+  e.preventDefault();
+  const len = pick("len"), cat = pick("cat");
+  const err = !len ? "Choose a word length." : !cat ? "Choose a category." : "";
+  $("e2").textContent = err;
+  if (err) return;
+  Object.assign(S, {len: +len, cat});
+  if (!WORDS.some(w => w.word.length === S.len && w.category === S.cat)){
+    $("e2").textContent = "No " + S.len + "-letter words in " + S.cat + " yet. Try another length or category.";
+    return;
+  }
+  newGame();
+  show("s3");
+});
+
+const TRIES = 6, G = {};
+const KEYROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+const RANK = {none: 1, near: 2, ok: 3};
+let msgTimer;
+
+function say(t){ $("msg").textContent = t; clearTimeout(msgTimer); msgTimer = setTimeout(() => { $("msg").textContent = ""; }, 1800); }
+
+function keyBtn(label, val){
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "key"; b.textContent = label; b.dataset.k = val;
+  b.addEventListener("click", () => { press(val); b.blur(); });
+  return b;
+}
+
+function newGame(){
+  const pool = WORDS.filter(w => w.word.length === S.len && w.category === S.cat);
+  let pick;
+  do { pick = pool[Math.floor(Math.random() * pool.length)]; } while (pool.length > 1 && pick === G.entry);
+  Object.assign(G, {entry: pick, target: pick.word.toUpperCase(), row: 0, cur: "", over: false, busy: false, keys: {}});
+  $("info").textContent = S.len + " letters, " + S.cat;
+  $("msg").textContent = ""; $("end").hidden = true;
+  const grid = $("grid"); grid.innerHTML = ""; grid.style.setProperty("--n", S.len);
+  for (let r = 0; r < TRIES; r++){
+    const row = document.createElement("div"); row.className = "grow";
+    for (let c = 0; c < S.len; c++){ const d = document.createElement("div"); d.className = "cell"; row.appendChild(d); }
+    grid.appendChild(row);
+  }
+  const kb = $("kb"); kb.innerHTML = "";
+  KEYROWS.forEach((chars, i) => {
+    const row = document.createElement("div"); row.className = "krow";
+    if (i === 2) row.appendChild(keyBtn("Enter", "enter"));
+    [...chars].forEach(ch => row.appendChild(keyBtn(ch, ch)));
+    if (i === 2) row.appendChild(keyBtn("Del", "back"));
+    kb.appendChild(row);
+  });
+}
+
+function paint(){
+  [...$("grid").children[G.row].children].forEach((c, i) => {
+    c.textContent = G.cur[i] || ""; c.classList.toggle("filled", !!G.cur[i]);
+  });
+}
+
+function press(k){
+  if (G.over || G.busy) return;
+  if (k === "enter") return submit();
+  if (k === "back") G.cur = G.cur.slice(0, -1);
+  else if (/^[a-z]$/.test(k) && G.cur.length < S.len) G.cur += k.toUpperCase();
+  else return;
+  paint();
+}
+
+function score(g, t){
+  const res = Array(g.length).fill("none"), left = {};
+  for (let i = 0; i < g.length; i++){
+    if (g[i] === t[i]) res[i] = "ok"; else left[t[i]] = (left[t[i]] || 0) + 1;
+  }
+  for (let i = 0; i < g.length; i++){
+    if (res[i] !== "ok" && left[g[i]] > 0){ res[i] = "near"; left[g[i]]--; }
+  }
+  return res;
+}
+
+async function submit(){
+  if (G.cur.length < S.len) return say("Not enough letters");
+  const guess = G.cur, res = score(guess, G.target);
+  const cs = [...$("grid").children[G.row].children], tasks = [];
+  G.busy = true;
+  const d = skip ? 0 : 170;
+  for (let i = 0; i < cs.length; i++){
+    tasks.push((async () => {
+      await cs[i].animate([{transform: "rotateX(0)"}, {transform: "rotateX(90deg)"}], {duration: d, fill: "forwards"}).finished;
+      cs[i].className = "cell " + res[i];
+      await cs[i].animate([{transform: "rotateX(90deg)"}, {transform: "rotateX(0)"}], {duration: d, fill: "forwards"}).finished;
+    })());
+    await sleep(110);
+  }
+  await Promise.all(tasks);
+  res.forEach((r, i) => {
+    const ch = guess[i].toLowerCase();
+    if (!G.keys[ch] || RANK[r] > RANK[G.keys[ch]]) G.keys[ch] = r;
+  });
+  document.querySelectorAll(".key").forEach(b => { if (G.keys[b.dataset.k]) b.className = "key " + G.keys[b.dataset.k]; });
+  G.busy = false;
+  if (guess === G.target) return finish(true);
+  G.row++; G.cur = "";
+  if (G.row === TRIES) finish(false);
+}
+
+function finish(won){
+  G.over = true;
+  $("endTitle").textContent = won ? "Solved in " + (G.row + 1) + (G.row === 0 ? " try" : " tries") : "The word was " + G.target;
+  $("endDef").textContent = G.entry.word.toUpperCase() + ": " + G.entry.definition;
+  $("end").hidden = false; $("again").focus();
+}
+
+addEventListener("keydown", e => {
+  if ($("s3").hidden || G.over || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === "Enter"){ e.preventDefault(); press("enter"); }
+  else if (e.key === "Backspace") press("back");
+  else if (/^[a-zA-Z]$/.test(e.key)) press(e.key.toLowerCase());
+});
+$("again").addEventListener("click", newGame);
+$("change").addEventListener("click", () => show("s2"));
+
+intro();
+</script>
+</body>
+</html>
